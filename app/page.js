@@ -3,6 +3,14 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Navbar from './components/Navbar'
 
+const lift = (y) => ({
+  onMouseEnter: (e) => {
+    e.currentTarget.style.transition = 'transform 0.2s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.2s cubic-bezier(0.25,0.46,0.45,0.94), border-color 0.2s cubic-bezier(0.25,0.46,0.45,0.94), background 0.2s cubic-bezier(0.25,0.46,0.45,0.94), color 0.2s cubic-bezier(0.25,0.46,0.45,0.94)'
+    e.currentTarget.style.transform = `translateY(${y}px)`
+  },
+  onMouseLeave: (e) => { e.currentTarget.style.transform = 'translateY(0)' },
+})
+
 export default function Home() {
   useEffect(() => {
     const reveals = document.querySelectorAll('.reveal')
@@ -33,8 +41,8 @@ export default function Home() {
           <strong>progresse plus vite que jamais</strong>.
         </p>
         <div className="hero-actions">
-          <Link href="/dashboard" className="btn-primary">Analyser ma première replay</Link>
-          <a href="#exemple" className="btn-secondary">Voir un exemple de rapport</a>
+          <Link href="/dashboard" className="btn-primary" {...lift(-2)}>Analyser ma première replay</Link>
+          <a href="#exemple" className="btn-secondary" {...lift(-2)}>Voir un exemple de rapport</a>
         </div>
         <div className="hero-stats">
           {[['BÊTA','Accès gratuit limité'],['6+','Jeux supportés'],['2-3 min','Par analyse complète'],['IA Vision','Analyse image réelle']].map(([val,label],i) => (
@@ -67,7 +75,7 @@ export default function Home() {
             {num:'03 / REPORT',icon:'📊',title:'Rapport de Performance',desc:'Rapport détaillé par domaine avec scores, erreurs identifiées et exemples clips.'},
             {num:'04 / GRIND',icon:'🎯',title:"Plan d'Entraînement",desc:"Exercices ciblés et objectifs hebdomadaires générés par l'IA pour ta progression."},
           ].map((s,i) => (
-            <div className="pipeline-step" key={i}>
+            <div className="pipeline-step" key={i} {...lift(-3)}>
               <span className="step-num">{s.num}</span>
               <span className="step-icon">{s.icon}</span>
               <div className="step-title">{s.title}</div>
@@ -93,7 +101,7 @@ export default function Home() {
             {num:'05',icon:'👁️',title:"Lecture de l'Environnement",desc:"L'IA mesure ta capacité à lire les signaux : son, mini-map, pings alliés, comportement ennemi. Information non utilisée = opportunité perdue.",tag:'INFO_AWARENESS'},
             {num:'06',icon:'📈',title:'Plan de Progression',desc:'Roadmap personnalisée semaine par semaine. Exercices ciblés, drills mécaniques, focus mental. Ton parcours vers le rang supérieur.',tag:'GROWTH_ENGINE'},
           ].map((f,i) => (
-            <div className="feature-card" key={i}>
+            <div className="feature-card" key={i} {...lift(-5)}>
               <span className="feature-number">MODULE // {f.num}</span>
               <div className="feature-icon-wrap">{f.icon}</div>
               <div className="feature-title">{f.title}</div>
@@ -112,7 +120,7 @@ export default function Home() {
         </div>
         <div className="games-list reveal">
           {[['🎯','VALORANT','LIVE'],['⚔️','LEAGUE OF LEGENDS','LIVE'],['💥','CS2','LIVE'],['🌀','OVERWATCH 2','LIVE'],['🏆','APEX LEGENDS','BETA'],['🔥','FORTNITE','BETA']].map(([icon,name,status],i) => (
-            <div className="game-tile" key={i}>
+            <div className="game-tile" key={i} {...lift(-3)}>
               <span className="game-emoji">{icon}</span>
               <span className="game-name">{name}</span>
               <span className="game-status">{status}</span>
@@ -211,7 +219,7 @@ export default function Home() {
               ))}
             </div>
             <div style={{padding:'1.5rem 1.8rem',borderTop:'1px solid var(--border)',textAlign:'center',background:'var(--dark)'}}>
-              <Link href="/dashboard" className="btn-primary" style={{display:'inline-block'}}>Recevoir mon rapport IA</Link>
+              <Link href="/dashboard" className="btn-primary" style={{display:'inline-block'}} {...lift(-2)}>Recevoir mon rapport IA</Link>
               <p style={{marginTop:'0.8rem',fontFamily:"'Share Tech Mono',monospace",fontSize:'0.6rem',color:'#2a4a5a',letterSpacing:'0.1em'}}>Gratuit · Sans inscription requise · 2-3 minutes</p>
             </div>
           </div>
@@ -226,7 +234,7 @@ export default function Home() {
           <p className="section-sub">Un coach humain coûte 50-150€/h. MVP.coaching analyse autant de replays que tu veux, 24h/24.</p>
         </div>
         <div className="pricing-grid reveal">
-          <div className="pricing-card">
+          <div className="pricing-card" {...lift(-4)}>
             <span className="pricing-tier">// RECRUIT</span>
             <span className="pricing-price"><sup>€</sup>0<span>/mois</span></span>
             <span className="pricing-billing">Gratuit pendant la bêta</span>
@@ -236,9 +244,9 @@ export default function Home() {
               <li>Vision IA — analyse image réelle</li><li>Plan d'entraînement hebdomadaire</li>
               <li className="dim">Historique des analyses</li><li className="dim">Comparaison avec les pros</li>
             </ul>
-            <Link href="/dashboard" className="pricing-btn outline">Analyser ma replay</Link>
+            <Link href="/dashboard" className="pricing-btn outline" {...lift(-2)}>Analyser ma replay</Link>
           </div>
-          <div className="pricing-card featured">
+          <div className="pricing-card featured" {...lift(-4)}>
             <div className="pricing-featured-badge">BIENTÔT</div>
             <span className="pricing-tier">// DIAMOND</span>
             <span className="pricing-price"><sup>€</sup>19<span>/mois</span></span>
@@ -249,9 +257,9 @@ export default function Home() {
               <li>Historique illimité + tendances</li><li>Heatmaps & positionnement avancé</li>
               <li>Plan de progression hebdomadaire</li><li>IA disponible 24h/24, 7j/7</li>
             </ul>
-            <Link href="/dashboard" className="pricing-btn solid">Tester gratuitement</Link>
+            <Link href="/dashboard" className="pricing-btn solid" {...lift(-2)}>Tester gratuitement</Link>
           </div>
-          <div className="pricing-card">
+          <div className="pricing-card" {...lift(-4)}>
             <span className="pricing-tier">// CHALLENGER</span>
             <span className="pricing-price"><sup>€</sup>49<span>/mois</span></span>
             <span className="pricing-billing">Pour les équipes · jusqu'à 5 joueurs</span>
@@ -261,7 +269,7 @@ export default function Home() {
               <li>Rapport stratégique de composition</li><li>Coach IA dédié par joueur</li>
               <li>Sessions VOD review en groupe</li><li>Intégrations Discord & Twitch</li>
             </ul>
-            <a href="#cta" className="pricing-btn outline">Rejoindre la liste d'attente</a>
+            <a href="#cta" className="pricing-btn outline" {...lift(-2)}>Rejoindre la liste d'attente</a>
           </div>
         </div>
       </section>
@@ -279,7 +287,7 @@ export default function Home() {
             {rank:'OVERWATCH 2 // GOLD — EU',text:"« Le rapport était vraiment basé sur ma replay, pas du générique. Il a vu que je sortais trop loin de ma tank line. C'est exactement ce que mon coach m'avait dit il y a 6 mois. »",avatar:'M',name:'Testeur bêta #2',game:'Support — bêta privée Mai 2025'},
             {rank:'CS2 // SILVER ELITE — FR',text:"« J'étais sceptique mais le plan d'entraînement était précis. 3 exercices ciblés sur mes vraies faiblesses, pas des conseils génériques. Je vais continuer à tester. »",avatar:'N',name:'Testeur bêta #3',game:'Entry Fragger — bêta privée Mai 2025'},
           ].map((t,i) => (
-            <div className="testimonial" key={i}>
+            <div className="testimonial" key={i} {...lift(-3)}>
               <span className="testimonial-rank">{t.rank}</span>
               <p className="testimonial-text">{t.text}</p>
               <div className="testimonial-author">
@@ -327,7 +335,7 @@ export default function Home() {
         <span className="cta-pre">// REJOINS LA BETA</span>
         <h2 className="cta-title">Arrête de stagner.<br />Commence à <span style={{color:'var(--cyan)'}}>dominer</span>.</h2>
         <p className="cta-sub">Analyse ta première replay gratuitement maintenant.</p>
-        <Link href="/dashboard" className="btn-primary" style={{fontSize:'0.85rem',padding:'16px 40px'}}>Analyser ma première replay</Link>
+        <Link href="/dashboard" className="btn-primary" style={{fontSize:'0.85rem',padding:'16px 40px'}} {...lift(-2)}>Analyser ma première replay</Link>
         <div className="cta-note">// Sans inscription · Accès immédiat · 2-3 minutes</div>
       </section>
 
@@ -335,7 +343,7 @@ export default function Home() {
       <footer>
         <div className="footer-logo">MVP<span>.</span>COACHING</div>
         <ul className="footer-links">
-          {['Confidentialité','CGU','Contact','Discord'].map(l => <li key={l}><a href="#">{l}</a></li>)}
+          {['Confidentialité','CGU','Contact','Discord'].map(l => <li key={l}><a href="#" {...lift(-1)}>{l}</a></li>)}
         </ul>
         <div className="footer-copy">© 2025 MVP.COACHING — ALL SYSTEMS ONLINE</div>
       </footer>
