@@ -37,6 +37,7 @@ export default function Navbar() {
         <Link href="/#how" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.4)', textDecoration: 'none' }}>Fonctionnement</Link>
         <Link href="/#exemple" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.4)', textDecoration: 'none' }}>Exemple</Link>
         <Link href="/#pricing" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.4)', textDecoration: 'none' }}>Tarifs</Link>
+        <Link href="/guides" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--cyan)', textDecoration: 'none' }}>Guides</Link>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
