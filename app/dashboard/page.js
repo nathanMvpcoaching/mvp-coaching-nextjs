@@ -203,6 +203,13 @@ export default function Dashboard() {
                 </div>
               )}
 
+              {/* Game match warning */}
+              {!analyzing && (
+                <div style={{ background: 'rgba(255,215,0,0.05)', border: '1px solid rgba(255,215,0,0.2)', color: '#ffd700', fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', padding: '10px 14px', marginBottom: '1.5rem', letterSpacing: '0.05em' }}>
+                  ⚠️ Assure-toi que ta replay correspond au jeu sélectionné — l'IA analyse uniquement avec le contexte du jeu choisi.
+                </div>
+              )}
+
               {/* Riot ID field — Valorant only */}
               {!analyzing && (user?.game || game) === 'Valorant' && (
                 <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
