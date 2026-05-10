@@ -1,43 +1,44 @@
 'use client'
 import Link from 'next/link'
 import Navbar from '../components/Navbar'
+import { SiValorant, SiLeagueoflegends, SiCounterstrike, SiOverwatch, COLOR } from '../components/GameIcons'
 
 const guides = [
   {
     slug: 'valorant',
     game: 'Valorant',
-    icon: '🎯',
+    Icon: SiValorant,
     rank: 'Silver → Diamond',
     desc: 'Crosshair placement, gestion des utilitaires, rotations et prise de décision. Tout ce qu\'il faut pour franchir les paliers compétitifs.',
     tags: ['Aim', 'Utilitaires', 'Rotations', 'Économie'],
-    color: '#ff4655',
+    color: COLOR.valorant,
   },
   {
     slug: 'lol',
     game: 'League of Legends',
-    icon: '⚔️',
+    Icon: SiLeagueoflegends,
     rank: 'Bronze → Platine',
     desc: 'Wave management, vision control, macro game et décisions de teamfight. La roadmap complète pour climb en solo queue.',
     tags: ['Wave Management', 'Vision', 'Macro', 'Teamfight'],
-    color: '#c89b3c',
+    color: COLOR.lol,
   },
   {
     slug: 'cs2',
     game: 'CS2',
-    icon: '💥',
+    Icon: SiCounterstrike,
     rank: 'Silver → MG2',
     desc: 'Utilisation des smokes, angles de prise, économie et communication. Les fondamentaux qui séparent les bons joueurs des grands.',
     tags: ['Smokes', 'Angles', 'Économie', 'Communication'],
-    color: '#f0a500',
+    color: COLOR.cs2,
   },
   {
     slug: 'overwatch',
     game: 'Overwatch 2',
-    icon: '🌀',
+    Icon: SiOverwatch,
     rank: 'Bronze → Diamond',
     desc: 'Gestion des ultimates, positioning selon le rôle, communication et lecture du teamfight. Progresser dans chaque rôle.',
     tags: ['Ultimates', 'Positioning', 'Rôles', 'Teamfight'],
-    color: '#fa9c1e',
+    color: COLOR.overwatch,
   },
 ]
 
@@ -74,7 +75,9 @@ export default function GuidesPage() {
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: `linear-gradient(90deg, ${g.color}, transparent)` }} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <span style={{ fontSize: '2.5rem', opacity: 0.8 }}>{g.icon}</span>
+                      <span style={{ display: 'inline-flex', color: g.color, filter: `drop-shadow(0 0 14px ${g.color}66)` }}>
+                        <g.Icon size={44} />
+                      </span>
                       <div>
                         <div style={{ fontFamily: "'Orbitron', monospace", fontSize: '0.9rem', fontWeight: 700, color: '#fff', marginBottom: '3px' }}>{g.game}</div>
                         <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '0.6rem', letterSpacing: '0.12em', color: g.color, textTransform: 'uppercase' }}>{g.rank}</div>

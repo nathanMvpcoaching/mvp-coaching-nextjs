@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Navbar from './components/Navbar'
+import { SiValorant, SiLeagueoflegends, SiCounterstrike, SiFortnite, SiOverwatch, SiApex, COLOR } from './components/GameIcons'
 
 const lift = (y) => ({
   onMouseEnter: (e) => {
@@ -119,9 +120,18 @@ export default function Home() {
           <h2 className="section-title">Ton <span className="dim">arsenal</span></h2>
         </div>
         <div className="games-list reveal">
-          {[['🎯','VALORANT','LIVE'],['⚔️','LEAGUE OF LEGENDS','LIVE'],['💥','CS2','LIVE'],['🌀','OVERWATCH 2','LIVE'],['🏆','APEX LEGENDS','BETA'],['🔥','FORTNITE','BETA']].map(([icon,name,status],i) => (
+          {[
+            { Icon: SiValorant, color: COLOR.valorant, name: 'VALORANT', status: 'LIVE' },
+            { Icon: SiLeagueoflegends, color: COLOR.lol, name: 'LEAGUE OF LEGENDS', status: 'LIVE' },
+            { Icon: SiCounterstrike, color: COLOR.cs2, name: 'CS2', status: 'LIVE' },
+            { Icon: SiOverwatch, color: COLOR.overwatch, name: 'OVERWATCH 2', status: 'LIVE' },
+            { Icon: SiApex, color: COLOR.apex, name: 'APEX LEGENDS', status: 'BETA' },
+            { Icon: SiFortnite, color: COLOR.fortnite, name: 'FORTNITE', status: 'BETA' },
+          ].map(({ Icon, color, name, status }, i) => (
             <div className="game-tile" key={i} {...lift(-3)}>
-              <span className="game-emoji">{icon}</span>
+              <span className="game-emoji" style={{ color, filter: `drop-shadow(0 0 12px ${color}55)` }}>
+                <Icon size={42} />
+              </span>
               <span className="game-name">{name}</span>
               <span className="game-status">{status}</span>
             </div>
