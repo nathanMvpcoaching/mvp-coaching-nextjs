@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar'
 const API = 'https://mvp-coaching-server.onrender.com'
 
 const GAMES = ['Valorant', 'League of Legends', 'CS2', 'Overwatch 2', 'Apex Legends', 'Fortnite']
+const COMING_SOON = ['Apex Legends', 'Fortnite']
 
 export default function Dashboard() {
   const router = useRouter()
@@ -27,7 +28,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     const s = localStorage.getItem('mvp_session')
-    if (s) setUser(JSON.parse(s))
+    if (s) {
+      const parsed = JSON.parse(s)
+      setUser(parsed)
+      if (parsed.game && !COMING_SOON.includes(parsed.game)) setGame(parsed.game)
+    }
   }, [])
 
   function hash(str) {
@@ -76,7 +81,7 @@ export default function Dashboard() {
     try {
       const fd = new FormData()
       fd.append('file', file, file.name)
-      fd.append('game', user?.game || game)
+      fd.append('game', game)
       fd.append('riot_id', riotId)
       fd.append('region', region)
 
@@ -191,15 +196,41 @@ export default function Dashboard() {
               {/* Game selector */}
               {!analyzing && (
                 <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {GAMES.map(g => (
-                    <button key={g} onClick={() => setGame(g)} style={{
-                      fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.1em',
-                      padding: '7px 14px', background: (user?.game || game) === g ? 'rgba(0,245,255,0.1)' : 'transparent',
-                      border: `1px solid ${(user?.game || game) === g ? 'var(--cyan)' : 'var(--border)'}`,
-                      color: (user?.game || game) === g ? 'var(--cyan)' : 'rgba(232,240,245,0.3)',
-                      cursor: 'pointer', textTransform: 'uppercase'
-                    }}>{g}</button>
-                  ))}
+                  {GAMES.map(g => {
+                    const isSoon = COMING_SOON.includes(g)
+                    const isActive = game === g
+                    return (
+                      <button
+                        key={g}
+                        onClick={() => { if (!isSoon) setGame(g) }}
+                        disabled={isSoon}
+                        style={{
+                          position: 'relative',
+                          fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.1em',
+                          padding: '7px 14px',
+                          background: isSoon ? 'rgba(232,240,245,0.02)' : (isActive ? 'rgba(0,245,255,0.1)' : 'transparent'),
+                          border: `1px solid ${isSoon ? 'rgba(232,240,245,0.08)' : (isActive ? 'var(--cyan)' : 'var(--border)')}`,
+                          color: isSoon ? 'rgba(232,240,245,0.18)' : (isActive ? 'var(--cyan)' : 'rgba(232,240,245,0.3)'),
+                          cursor: isSoon ? 'not-allowed' : 'pointer',
+                          textTransform: 'uppercase',
+                          opacity: isSoon ? 0.55 : 1
+                        }}
+                      >
+                        {g}
+                        {isSoon && (
+                          <span style={{
+                            marginLeft: '8px',
+                            fontSize: '0.55rem',
+                            padding: '2px 6px',
+                            background: 'rgba(255,215,0,0.08)',
+                            border: '1px solid rgba(255,215,0,0.25)',
+                            color: '#ffd700',
+                            letterSpacing: '0.12em'
+                          }}>BIENTÔT</span>
+                        )}
+                      </button>
+                    )
+                  })}
                 </div>
               )}
 
@@ -211,7 +242,7 @@ export default function Dashboard() {
               )}
 
               {/* Riot ID field — Valorant only */}
-              {!analyzing && (user?.game || game) === 'Valorant' && (
+              {!analyzing && game === 'Valorant' && (
                 <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                   <div style={{ flex: '1 1 240px' }}>
                     <label style={{ display: 'block', fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.4)', marginBottom: '6px' }}>Riot ID</label>
