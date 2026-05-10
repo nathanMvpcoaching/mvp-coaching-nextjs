@@ -16,6 +16,8 @@ export default function Dashboard() {
   const [file, setFile] = useState(null)
   const [videoUrl, setVideoUrl] = useState(null)
   const [game, setGame] = useState('Valorant')
+  const [riotId, setRiotId] = useState('')
+  const [region, setRegion] = useState('EUW')
   const [analyzing, setAnalyzing] = useState(false)
   const [progress, setProgress] = useState(0)
   const [progressMsg, setProgressMsg] = useState('')
@@ -75,6 +77,8 @@ export default function Dashboard() {
       const fd = new FormData()
       fd.append('file', file, file.name)
       fd.append('game', user?.game || game)
+      fd.append('riot_id', riotId)
+      fd.append('region', region)
 
       setProgress(15)
       const created = await fetch(`${API}/v1/analyses`, { method: 'POST', body: fd }).then(r => {
@@ -196,6 +200,39 @@ export default function Dashboard() {
                       cursor: 'pointer', textTransform: 'uppercase'
                     }}>{g}</button>
                   ))}
+                </div>
+              )}
+
+              {/* Riot ID field — Valorant only */}
+              {!analyzing && (user?.game || game) === 'Valorant' && (
+                <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                  <div style={{ flex: '1 1 240px' }}>
+                    <label style={{ display: 'block', fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.4)', marginBottom: '6px' }}>Riot ID</label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        value={riotId}
+                        onChange={e => setRiotId(e.target.value)}
+                        placeholder="NomJoueur#EUW"
+                        style={{ width: '100%', background: 'rgba(0,245,255,0.03)', border: '1px solid var(--cyan)', outline: 'none', padding: '11px 36px 11px 14px', fontFamily: 'Rajdhani, sans-serif', fontSize: '0.95rem', color: '#e8f0f5' }}
+                      />
+                      {riotId.trim() && (
+                        <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', width: '8px', height: '8px', borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 8px rgba(0,255,136,0.6)' }} />
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ flex: '0 0 140px' }}>
+                    <label style={{ display: 'block', fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.4)', marginBottom: '6px' }}>Région</label>
+                    <select
+                      value={region}
+                      onChange={e => setRegion(e.target.value)}
+                      style={{ width: '100%', background: 'rgba(0,245,255,0.03)', border: '1px solid var(--cyan)', outline: 'none', padding: '11px 14px', fontFamily: 'Rajdhani, sans-serif', fontSize: '0.95rem', color: '#e8f0f5' }}
+                    >
+                      {['EUW', 'EUNE', 'NA', 'KR'].map(r => (
+                        <option key={r} value={r} style={{ background: '#0d1318' }}>{r}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               )}
 
