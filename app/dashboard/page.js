@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [progressMsg, setProgressMsg] = useState('')
   const [error, setError] = useState('')
   const [dragover, setDragover] = useState(false)
+  const [hoverGame, setHoverGame] = useState(null)
   const fileRef = useRef()
 
   useEffect(() => {
@@ -199,21 +200,47 @@ export default function Dashboard() {
                   {GAMES.map(g => {
                     const isSoon = COMING_SOON.includes(g)
                     const isActive = game === g
+                    const isHover = hoverGame === g && !isActive && !isSoon
+
+                    let background, border, color, boxShadow
+                    if (isSoon) {
+                      background = 'rgba(232,240,245,0.02)'
+                      border = '1px solid rgba(255,255,255,0.1)'
+                      color = 'rgba(232,240,245,0.18)'
+                      boxShadow = 'none'
+                    } else if (isActive) {
+                      background = 'rgba(0,245,255,0.15)'
+                      border = '1px solid var(--cyan)'
+                      color = 'var(--cyan)'
+                      boxShadow = '0 0 12px rgba(0,245,255,0.2)'
+                    } else if (isHover) {
+                      background = 'rgba(0,245,255,0.05)'
+                      border = '1px solid rgba(0,245,255,0.4)'
+                      color = 'rgba(232,240,245,0.6)'
+                      boxShadow = 'none'
+                    } else {
+                      background = 'transparent'
+                      border = '1px solid rgba(0,245,255,0.3)'
+                      color = 'rgba(232,240,245,0.6)'
+                      boxShadow = 'none'
+                    }
+
                     return (
                       <button
                         key={g}
                         onClick={() => { if (!isSoon) setGame(g) }}
+                        onMouseEnter={() => setHoverGame(g)}
+                        onMouseLeave={() => setHoverGame(null)}
                         disabled={isSoon}
                         style={{
                           position: 'relative',
                           fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.1em',
                           padding: '7px 14px',
-                          background: isSoon ? 'rgba(232,240,245,0.02)' : (isActive ? 'rgba(0,245,255,0.1)' : 'transparent'),
-                          border: `1px solid ${isSoon ? 'rgba(232,240,245,0.08)' : (isActive ? 'var(--cyan)' : 'var(--border)')}`,
-                          color: isSoon ? 'rgba(232,240,245,0.18)' : (isActive ? 'var(--cyan)' : 'rgba(232,240,245,0.3)'),
+                          background, border, color, boxShadow,
                           cursor: isSoon ? 'not-allowed' : 'pointer',
                           textTransform: 'uppercase',
-                          opacity: isSoon ? 0.55 : 1
+                          opacity: isSoon ? 0.55 : 1,
+                          transition: 'background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s'
                         }}
                       >
                         {g}
