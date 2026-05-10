@@ -36,7 +36,7 @@ export default function Rapport() {
       if (!uid) return
       const { data, error } = await supabase
         .from('analyses')
-        .select('id, game, score, created_at, report')
+        .select('id, jeu, score_global, created_at, report')
         .eq('user_id', uid)
         .order('created_at', { ascending: false })
         .limit(5)
@@ -200,8 +200,8 @@ export default function Rapport() {
                   <button key={h.id} onClick={() => openAnalysis(h)} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: '1rem', alignItems: 'center', background: 'transparent', border: '1px solid rgba(0,245,255,0.15)', padding: '12px 16px', cursor: 'pointer', textAlign: 'left', transition: 'border-color 0.15s, background 0.15s' }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,245,255,0.5)'; e.currentTarget.style.background = 'rgba(0,245,255,0.04)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,245,255,0.15)'; e.currentTarget.style.background = 'transparent' }}>
-                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.1em', color: '#e8f0f5', textTransform: 'uppercase' }}>{h.game}</span>
-                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '0.95rem', fontWeight: 700, color: scoreColor(h.score ?? 0) }}>{h.score ?? '—'}</span>
+                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.1em', color: '#e8f0f5', textTransform: 'uppercase' }}>{h.jeu}</span>
+                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '0.95rem', fontWeight: 700, color: scoreColor(h.score_global ?? 0) }}>{h.score_global ?? '—'}</span>
                     <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', color: 'rgba(232,240,245,0.4)' }}>{new Date(h.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                     <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.14em', color: 'var(--cyan)', textTransform: 'uppercase' }}>Revoir →</span>
                   </button>

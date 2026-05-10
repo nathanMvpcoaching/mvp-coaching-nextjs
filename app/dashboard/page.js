@@ -144,8 +144,8 @@ export default function Dashboard() {
           if (user?.id) {
             const { error: dbError } = await supabase.from('analyses').insert({
               user_id: user.id,
-              game,
-              score: job.report.score_global ?? null,
+              jeu: game,
+              score_global: job.report.score_global ?? null,
               report: job.report,
               riot_id: riotId || null,
               region: region || null,

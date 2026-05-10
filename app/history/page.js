@@ -33,7 +33,7 @@ export default function HistoryPage() {
 
       const { data, error: fetchError } = await supabase
         .from('analyses')
-        .select('id, game, score, created_at, riot_id, region, report')
+        .select('id, jeu, score_global, created_at, riot_id, region, report')
         .eq('user_id', u.id)
         .order('created_at', { ascending: false })
 
@@ -117,12 +117,12 @@ export default function HistoryPage() {
                   onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,245,255,0.5)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)' }}
                 >
-                  <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '1.4rem', fontWeight: 900, color: scoreColor(a.score), textAlign: 'center' }}>
-                    {a.score ?? '—'}
+                  <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '1.4rem', fontWeight: 900, color: scoreColor(a.score_global), textAlign: 'center' }}>
+                    {a.score_global ?? '—'}
                   </div>
                   <div>
                     <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.72rem', letterSpacing: '0.1em', color: '#e8f0f5', textTransform: 'uppercase', marginBottom: '4px' }}>
-                      {a.game || 'Replay'}
+                      {a.jeu || 'Replay'}
                     </div>
                     <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.08em', color: 'rgba(232,240,245,0.35)' }}>
                       {fmtDate(a.created_at)}
