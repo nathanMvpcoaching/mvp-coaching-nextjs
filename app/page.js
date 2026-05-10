@@ -1,5 +1,5 @@
 'use client'
-import { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Navbar from './components/Navbar'
 
@@ -344,7 +344,7 @@ export default function Home() {
 }
 
 function FaqItem({ q, a }) {
-  const [open, setOpen] = require('react').useState(false)
+  const [open, setOpen] = React.useState(false)
   return (
     <div style={{background: open ? 'var(--dark3)' : 'var(--dark2)', transition:'background 0.2s'}}>
       <button onClick={() => setOpen(!open)} style={{width:'100%',display:'flex',justifyContent:'space-between',alignItems:'center',padding:'1.4rem 1.8rem',background:'transparent',border:'none',cursor:'pointer',textAlign:'left',gap:'1rem'}}>
