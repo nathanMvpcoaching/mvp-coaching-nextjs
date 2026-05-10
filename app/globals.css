@@ -1186,6 +1186,19 @@ footer {
   40%          { opacity: 1;   transform: scale(1); }
 }
 
+/* ── CIRCULAR SPINNER ── */
+.spinner-cyan {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid rgba(0,245,255,0.15);
+  border-top-color: var(--cyan);
+  animation: spin 0.9s linear infinite;
+  box-shadow: 0 0 12px rgba(0,245,255,0.25);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ── CANVAS PARTICLES ── */
 #particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
