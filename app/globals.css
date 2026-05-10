@@ -1196,3 +1196,124 @@ footer {
   .hero-stats { flex-wrap: wrap; }
   .games-list { flex-direction: column; }
 }
+
+/* ── POLISH UI/UX ── */
+
+/* Boutons — micro-interactions */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.12);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0,245,255,0.35); }
+.btn-primary:hover::after { opacity: 1; }
+.btn-primary:active { transform: translateY(0) scale(0.98); box-shadow: none; }
+
+.btn-secondary {
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, background 0.2s ease !important;
+}
+.btn-secondary:hover { transform: translateY(-2px); background: rgba(255,255,255,0.04); }
+.btn-secondary:active { transform: scale(0.98); }
+
+/* Cards — hover fluide */
+.feature-card {
+  transition: transform 0.25s cubic-bezier(.25,.46,.45,.94), border-color 0.25s ease, background 0.25s ease !important;
+}
+.feature-card:hover { transform: translateY(-5px); border-color: rgba(0,245,255,0.3) !important; }
+
+.pricing-card {
+  transition: transform 0.25s cubic-bezier(.25,.46,.45,.94), box-shadow 0.25s ease !important;
+}
+.pricing-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.pricing-card.featured:hover { box-shadow: 0 20px 60px rgba(0,245,255,0.12); }
+
+.pipeline-step {
+  transition: background 0.2s ease, border-color 0.2s ease !important;
+}
+.pipeline-step:hover { background: var(--dark3) !important; border-color: rgba(0,245,255,0.25) !important; }
+
+.game-tile {
+  transition: background 0.2s ease, transform 0.2s ease !important;
+}
+.game-tile:hover { transform: translateY(-3px); }
+
+.testimonial {
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease !important;
+}
+.testimonial:hover { transform: translateY(-3px); border-color: rgba(0,245,255,0.2) !important; }
+
+/* Reveal — animation plus fluide */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(.25,.46,.45,.94), transform 0.7s cubic-bezier(.25,.46,.45,.94);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* Sections — padding réduit */
+.how-section { padding: 70px 5% !important; }
+.features-section { padding: 70px 5% !important; }
+.games-section { padding: 50px 5% !important; }
+.pricing-section { padding: 70px 5% !important; }
+.testimonials-section { padding: 70px 5% !important; }
+
+/* Footer amélioré */
+footer {
+  background: var(--dark2) !important;
+  border-top: 1px solid var(--border) !important;
+  padding: 48px 5% !important;
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important;
+  align-items: center !important;
+}
+.footer-logo {
+  font-size: 1.1rem !important;
+  letter-spacing: 0.08em !important;
+}
+.footer-logo span { color: var(--cyan); text-shadow: 0 0 15px rgba(0,245,255,0.4); }
+.footer-links {
+  display: flex !important;
+  gap: 2.5rem !important;
+  list-style: none !important;
+}
+.footer-links a {
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: rgba(200,221,232,0.25) !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+}
+.footer-links a:hover { color: var(--cyan) !important; }
+.footer-copy {
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 0.58rem !important;
+  color: rgba(0,245,255,0.15) !important;
+  letter-spacing: 0.12em !important;
+  text-align: right !important;
+}
+
+/* Pricing btn hover */
+.pricing-btn {
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease !important;
+}
+.pricing-btn:hover { transform: translateY(-2px); }
+.pricing-btn.solid:hover { box-shadow: 0 0 25px rgba(0,245,255,0.3); }
+
+/* Nav links hover */
+nav a { transition: color 0.2s ease !important; }
+nav a:hover { color: var(--cyan) !important; }
+
+/* Scroll fluide global */
+html { scroll-behavior: smooth; }
+* { -webkit-font-smoothing: antialiased; }
