@@ -8,8 +8,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="fr">
-      <body>
+    <html lang="fr" style={{ scrollBehavior: 'smooth' }}>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=0.85" />
+      </head>
+      <body style={{ overflowX: 'hidden' }}>
         <div className="grid-bg" />
         <div className="scanlines" />
         <Particles />
