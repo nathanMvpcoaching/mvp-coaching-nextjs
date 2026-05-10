@@ -105,8 +105,14 @@ export default function Dashboard() {
           setProgress(100)
           setProgressMsg('Analyse terminée !')
           sessionStorage.setItem('mvp_rapport', JSON.stringify(job.report))
+          console.log('[dashboard] mvp_rapport sauvegardé:', {
+            keys: Object.keys(job.report || {}),
+            size: JSON.stringify(job.report).length,
+            stored: sessionStorage.getItem('mvp_rapport')?.slice(0, 200),
+          })
           await new Promise(r => setTimeout(r, 500))
-          router.push('/rapport')
+          console.log('[dashboard] redirection vers /rapport...')
+          window.location.href = '/rapport'
           return
         }
         if (job.status === 'failed') throw new Error(job.error || 'Analyse échouée')
