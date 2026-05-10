@@ -1,19 +1,27 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { supabase } from '../../lib/supabase'
 
 export default function Navbar() {
   const [user, setUser] = useState(null)
-  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    const s = localStorage.getItem('mvp_session')
-    if (s) setUser(JSON.parse(s))
+    let mounted = true
+    function applySession(session) {
+      if (!mounted) return
+      const u = session?.user
+      if (!u) { setUser(null); return }
+      const meta = u.user_metadata || {}
+      setUser({ id: u.id, email: u.email, pseudo: meta.pseudo || u.email, game: meta.game || 'Valorant' })
+    }
+    supabase.auth.getSession().then(({ data }) => applySession(data.session))
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => applySession(session))
+    return () => { mounted = false; sub.subscription.unsubscribe() }
   }, [])
 
-  function logout() {
-    localStorage.removeItem('mvp_session')
-    setUser(null)
+  async function logout() {
+    await supabase.auth.signOut()
     window.location.href = '/'
   }
 
@@ -39,6 +47,9 @@ export default function Navbar() {
         <Link href="/#pricing" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.4)', textDecoration: 'none' }}>Tarifs</Link>
         <Link href="/guides" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--cyan)', textDecoration: 'none' }}>Guides</Link>
         <Link href="/stats" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--cyan)', textDecoration: 'none' }}>Stats</Link>
+        {user && (
+          <Link href="/history" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--cyan)', textDecoration: 'none' }}>Historique</Link>
+        )}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

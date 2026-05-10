@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '../components/Navbar'
+import { supabase } from '../../lib/supabase'
 
 const TYPE_STYLES = {
   critique: { bg: 'rgba(255,64,96,0.12)', border: 'rgba(255,64,96,0.3)', color: '#ff4060', label: 'CRITIQUE' },
@@ -20,23 +21,34 @@ export default function Rapport() {
   const router = useRouter()
   const [report, setReport] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [history, setHistory] = useState([])
 
   useEffect(() => {
     const raw = sessionStorage.getItem('mvp_rapport')
-    console.log('[rapport] sessionStorage mvp_rapport présent:', !!raw)
-    if (!raw) {
-      setLoading(false)
-      return
-    }
-    try {
-      const data = JSON.parse(raw)
-      console.log('[rapport] report parsé:', { jeu: data.jeu, score: data.score_global, modules: data.modules?.length })
-      setReport(data)
-    } catch (e) {
-      console.error('[rapport] JSON.parse a échoué:', e)
+    if (raw) {
+      try { setReport(JSON.parse(raw)) } catch (e) { console.error('[rapport] JSON.parse a échoué:', e) }
     }
     setLoading(false)
+
+    ;(async () => {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const uid = sessionData?.session?.user?.id
+      if (!uid) return
+      const { data, error } = await supabase
+        .from('analyses')
+        .select('id, game, score, created_at, report')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false })
+        .limit(5)
+      if (error) { console.warn('[rapport] history fetch failed:', error.message); return }
+      setHistory(data || [])
+    })()
   }, [])
+
+  function openAnalysis(item) {
+    if (item?.report) sessionStorage.setItem('mvp_rapport', JSON.stringify(item.report))
+    window.location.href = '/rapport'
+  }
 
   if (loading) {
     return (
@@ -179,9 +191,29 @@ export default function Rapport() {
             </div>
           )}
 
+          {/* Mes analyses précédentes */}
+          {history.length > 0 && (
+            <div style={{ marginTop: '2.5rem', border: '1px solid var(--border)', background: 'var(--dark2)', padding: '1.8rem' }}>
+              <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.16em', color: 'var(--cyan)', marginBottom: '1rem' }}>// MES ANALYSES PRÉCÉDENTES</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {history.map(h => (
+                  <button key={h.id} onClick={() => openAnalysis(h)} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: '1rem', alignItems: 'center', background: 'transparent', border: '1px solid rgba(0,245,255,0.15)', padding: '12px 16px', cursor: 'pointer', textAlign: 'left', transition: 'border-color 0.15s, background 0.15s' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,245,255,0.5)'; e.currentTarget.style.background = 'rgba(0,245,255,0.04)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,245,255,0.15)'; e.currentTarget.style.background = 'transparent' }}>
+                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.1em', color: '#e8f0f5', textTransform: 'uppercase' }}>{h.game}</span>
+                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '0.95rem', fontWeight: 700, color: scoreColor(h.score ?? 0) }}>{h.score ?? '—'}</span>
+                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', color: 'rgba(232,240,245,0.4)' }}>{new Date(h.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.14em', color: 'var(--cyan)', textTransform: 'uppercase' }}>Revoir →</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Footer actions */}
           <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             <Link href="/dashboard" className="btn-primary" style={{ fontSize: '0.78rem', padding: '13px 28px' }}>⚡ Analyser une autre replay</Link>
+            <Link href="/history" style={{ fontFamily: 'Orbitron, monospace', fontWeight: 700, fontSize: '0.78rem', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '13px 28px', background: 'transparent', color: 'var(--cyan)', border: '1px solid var(--cyan)', textDecoration: 'none' }}>Tout l'historique</Link>
           </div>
         </div>
       </main>

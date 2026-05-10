@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '../components/Navbar'
+import { supabase } from '../../lib/supabase'
 
 const API = 'https://mvp-coaching-server.onrender.com'
 
@@ -54,39 +55,38 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    const s = localStorage.getItem('mvp_session')
-    if (s) {
-      const parsed = JSON.parse(s)
-      setUser(parsed)
-      if (parsed.game && !COMING_SOON.includes(parsed.game)) setGame(parsed.game)
+    let mounted = true
+    function applySession(session) {
+      if (!mounted) return
+      const u = session?.user
+      if (!u) { setUser(null); return }
+      const meta = u.user_metadata || {}
+      const profile = { id: u.id, email: u.email, pseudo: meta.pseudo || u.email, game: meta.game || 'Valorant' }
+      setUser(profile)
+      if (profile.game && !COMING_SOON.includes(profile.game)) setGame(profile.game)
     }
+    supabase.auth.getSession().then(({ data }) => applySession(data.session))
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => applySession(session))
+    return () => { mounted = false; sub.subscription.unsubscribe() }
   }, [])
 
-  function hash(str) {
-    let h = 0
-    for (let i = 0; i < str.length; i++) h = ((h << 5) - h) + str.charCodeAt(i) | 0
-    return String(h)
-  }
-
-  function login(email, password) {
-    const users = JSON.parse(localStorage.getItem('mvp_users') || '[]')
-    const u = users.find(x => x.email === email.toLowerCase() && x.hash === hash(password))
-    if (!u) return 'Email ou mot de passe incorrect.'
-    const session = { email: u.email, pseudo: u.pseudo, game: u.game }
-    localStorage.setItem('mvp_session', JSON.stringify(session))
-    setUser(session)
+  async function login(email, password) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.toLowerCase().trim(),
+      password,
+    })
+    if (error) return error.message || 'Email ou mot de passe incorrect.'
     setShowAuth(false)
     return null
   }
 
-  function register(pseudo, email, password, g) {
-    const users = JSON.parse(localStorage.getItem('mvp_users') || '[]')
-    if (users.find(u => u.email === email.toLowerCase())) return 'Email déjà utilisé.'
-    users.push({ pseudo, email: email.toLowerCase(), hash: hash(password), game: g })
-    localStorage.setItem('mvp_users', JSON.stringify(users))
-    const session = { email: email.toLowerCase(), pseudo, game: g }
-    localStorage.setItem('mvp_session', JSON.stringify(session))
-    setUser(session)
+  async function register(pseudo, email, password, g) {
+    const { error } = await supabase.auth.signUp({
+      email: email.toLowerCase().trim(),
+      password,
+      options: { data: { pseudo, game: g } },
+    })
+    if (error) return error.message || 'Inscription impossible.'
     setShowAuth(false)
     return null
   }
@@ -141,13 +141,18 @@ export default function Dashboard() {
           setProgress(100)
           setProgressMsg('Analyse terminée !')
           sessionStorage.setItem('mvp_rapport', JSON.stringify(job.report))
-          console.log('[dashboard] mvp_rapport sauvegardé:', {
-            keys: Object.keys(job.report || {}),
-            size: JSON.stringify(job.report).length,
-            stored: sessionStorage.getItem('mvp_rapport')?.slice(0, 200),
-          })
+          if (user?.id) {
+            const { error: dbError } = await supabase.from('analyses').insert({
+              user_id: user.id,
+              game,
+              score: job.report.score_global ?? null,
+              report: job.report,
+              riot_id: riotId || null,
+              region: region || null,
+            })
+            if (dbError) console.warn('[dashboard] save analysis failed:', dbError.message)
+          }
           await new Promise(r => setTimeout(r, 500))
-          console.log('[dashboard] redirection vers /rapport...')
           window.location.href = '/rapport'
           return
         }
@@ -429,11 +434,15 @@ function LoginForm({ onSubmit }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    const err = onSubmit(email, password)
+    setLoading(true)
+    setError('')
+    const err = await onSubmit(email, password)
     if (err) setError(err)
+    setLoading(false)
   }
 
   return (
@@ -441,7 +450,7 @@ function LoginForm({ onSubmit }) {
       {error && <div style={{ background: 'rgba(255,0,80,0.08)', border: '1px solid rgba(255,0,80,0.2)', color: '#ff6080', padding: '8px 12px', fontSize: '0.8rem', marginBottom: '1rem' }}>{error}</div>}
       <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="ton@email.com" />
       <Field label="Mot de passe" type="password" value={password} onChange={setPassword} placeholder="••••••••" />
-      <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem', textAlign: 'center', display: 'block' }}>Se connecter</button>
+      <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', marginTop: '0.5rem', textAlign: 'center', display: 'block', opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>{loading ? 'Connexion...' : 'Se connecter'}</button>
     </form>
   )
 }
@@ -452,11 +461,15 @@ function RegisterForm({ onSubmit, games }) {
   const [password, setPassword] = useState('')
   const [game, setGame] = useState('Valorant')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    const err = onSubmit(pseudo, email, password, game)
+    setLoading(true)
+    setError('')
+    const err = await onSubmit(pseudo, email, password, game)
     if (err) setError(err)
+    setLoading(false)
   }
 
   return (
@@ -467,11 +480,11 @@ function RegisterForm({ onSubmit, games }) {
       <Field label="Mot de passe" type="password" value={password} onChange={setPassword} placeholder="••••••••" />
       <div style={{ marginBottom: '1rem' }}>
         <label style={{ display: 'block', fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.4)', marginBottom: '6px' }}>Jeu principal</label>
-        <select value={game} onChange={e => setGame(e.target.value)} style={{ width: '100%', background: 'rgba(0,245,255,0.03)', border: '1px solid var(--border)', outline: 'none', padding: '11px 14px', fontFamily: 'Rajdhani, sans-serif', fontSize: '0.95rem', color: 'var(--white)', color: '#e8f0f5' }}>
+        <select value={game} onChange={e => setGame(e.target.value)} style={{ width: '100%', background: 'rgba(0,245,255,0.03)', border: '1px solid var(--border)', outline: 'none', padding: '11px 14px', fontFamily: 'Rajdhani, sans-serif', fontSize: '0.95rem', color: '#e8f0f5' }}>
           {games.map(g => <option key={g} value={g} style={{ background: '#0d1318' }}>{g}</option>)}
         </select>
       </div>
-      <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem', textAlign: 'center', display: 'block' }}>Créer mon compte</button>
+      <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', marginTop: '0.5rem', textAlign: 'center', display: 'block', opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>{loading ? 'Création...' : 'Créer mon compte'}</button>
     </form>
   )
 }
