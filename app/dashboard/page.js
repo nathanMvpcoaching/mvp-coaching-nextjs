@@ -9,6 +9,25 @@ const API = 'https://mvp-coaching-server.onrender.com'
 const GAMES = ['Valorant', 'League of Legends', 'CS2', 'Overwatch 2', 'Apex Legends', 'Fortnite']
 const COMING_SOON = ['Apex Legends', 'Fortnite']
 
+const QUOTES = [
+  { text: 'Le rang ne ment pas. Grind.', author: 'TenZ' },
+  { text: 'You miss 100% of the shots you don\'t take.', author: 'Faker' },
+  { text: 'Trust your aim, trust your team.', author: 'ScreaM' },
+  { text: 'Mentalité avant mécanique.', author: 'Caps' },
+  { text: 'Every death is a lesson, every win is a habit.', author: 's1mple' },
+  { text: 'Le talent ouvre la porte. Le travail la défonce.', author: 'ZywOo' },
+  { text: 'Stay calm, stay sharp, stay hungry.', author: 'Shroud' },
+  { text: 'Le clutch, c\'est juste de la confiance bien placée.', author: 'Nivera' },
+]
+
+function getGreeting() {
+  const h = new Date().getHours()
+  if (h >= 22 || h < 6) return 'Bonne session de grind 🌙'
+  if (h < 12) return 'Prêt à dominer ? ☀️'
+  if (h < 18) return 'On enchaîne les wins ? 🔥'
+  return 'Session du soir 🎮'
+}
+
 export default function Dashboard() {
   const router = useRouter()
   const [user, setUser] = useState(null)
@@ -25,7 +44,14 @@ export default function Dashboard() {
   const [error, setError] = useState('')
   const [dragover, setDragover] = useState(false)
   const [hoverGame, setHoverGame] = useState(null)
+  const [greeting, setGreeting] = useState('')
+  const [quote, setQuote] = useState(null)
   const fileRef = useRef()
+
+  useEffect(() => {
+    setGreeting(getGreeting())
+    setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)])
+  }, [])
 
   useEffect(() => {
     const s = localStorage.getItem('mvp_session')
@@ -179,9 +205,22 @@ export default function Dashboard() {
           {/* Header */}
           <div style={{ marginBottom: '3rem' }}>
             <span className="section-tag">// MON COACH IA</span>
-            <h1 style={{ fontFamily: 'Orbitron, monospace', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#fff' }}>
+            <h1 style={{ fontFamily: 'Orbitron, monospace', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#fff', marginBottom: '0.4rem' }}>
               Analyse ta <span style={{ color: 'rgba(232,240,245,0.25)' }}>replay</span>
             </h1>
+            {greeting && (
+              <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.78rem', letterSpacing: '0.08em', color: 'var(--cyan)', marginTop: '0.6rem' }}>
+                {greeting}
+              </div>
+            )}
+            {quote && (
+              <div style={{ marginTop: '1rem', paddingLeft: '12px', borderLeft: '2px solid rgba(0,245,255,0.35)', fontFamily: 'Rajdhani, sans-serif', fontStyle: 'italic', fontSize: '0.95rem', color: 'rgba(232,240,245,0.55)' }}>
+                « {quote.text} »
+                <span style={{ display: 'block', fontStyle: 'normal', fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.3)', marginTop: '4px' }}>
+                  — {quote.author}
+                </span>
+              </div>
+            )}
           </div>
 
           {!user ? (
@@ -349,7 +388,12 @@ export default function Dashboard() {
               {analyzing && (
                 <div style={{ marginTop: '1.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.14em', color: 'var(--cyan)', marginBottom: '8px' }}>
-                    <span>ANALYSE EN COURS</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      ANALYSE EN COURS
+                      <span className="dots-loading" aria-hidden="true">
+                        <span /><span /><span />
+                      </span>
+                    </span>
                     <span>{progress}%</span>
                   </div>
                   <div style={{ height: '3px', background: 'rgba(0,245,255,0.08)' }}>
