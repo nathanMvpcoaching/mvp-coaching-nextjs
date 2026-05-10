@@ -2,7 +2,7 @@ import './globals.css'
 
 export const metadata = {
   title: 'MVP.coaching — IA Coach Esport',
-  description: 'Analyse tes replays avec l\'IA.',
+  description: 'Analyse tes replays avec l\'IA. Coaching personnalisé sur Valorant, CS2, LoL, OW2.',
 }
 
 export default function RootLayout({ children }) {

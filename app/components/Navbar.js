@@ -4,6 +4,7 @@ import Link from 'next/link'
 
 export default function Navbar() {
   const [user, setUser] = useState(null)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     const s = localStorage.getItem('mvp_session')
@@ -33,13 +34,9 @@ export default function Navbar() {
       </Link>
 
       <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
-        {['Fonctionnement', 'Exemple', 'Tarifs'].map((l, i) => (
-          <a key={i} href={`/#${['how', 'exemple', 'pricing'][i]}`} style={{
-            fontFamily: 'Rajdhani, sans-serif', fontWeight: 600,
-            fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase',
-            color: '#4a7a8a', textDecoration: 'none'
-          }}>{l}</a>
-        ))}
+        <Link href="/#how" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.4)', textDecoration: 'none' }}>Fonctionnement</Link>
+        <Link href="/#exemple" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.4)', textDecoration: 'none' }}>Exemple</Link>
+        <Link href="/#pricing" style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(232,240,245,0.4)', textDecoration: 'none' }}>Tarifs</Link>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -47,7 +44,7 @@ export default function Navbar() {
           <>
             <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', color: 'var(--cyan)' }}>// {user.pseudo}</span>
             <Link href="/dashboard" className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.7rem' }}>Dashboard</Link>
-            <button onClick={logout} style={{ fontFamily: 'Orbitron, monospace', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', color: '#4a7a8a', border: '1px solid var(--border)', cursor: 'pointer' }}>Déconnexion</button>
+            <button onClick={logout} style={{ fontFamily: 'Orbitron, monospace', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', background: 'transparent', color: 'rgba(232,240,245,0.3)', border: '1px solid var(--border)', cursor: 'pointer' }}>Déconnexion</button>
           </>
         ) : (
           <Link href="/dashboard" className="btn-primary" style={{ padding: '10px 22px', fontSize: '0.72rem' }}>Analyser ma replay</Link>
