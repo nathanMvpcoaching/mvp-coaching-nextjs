@@ -291,6 +291,33 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section style={{padding:'80px 5%',position:'relative',zIndex:2}} id="faq">
+        <div style={{maxWidth:'800px',margin:'0 auto'}}>
+          <div style={{textAlign:'center',marginBottom:'3rem'}}>
+            <span className="section-tag">// FAQ</span>
+            <h2 className="section-title">Questions <span className="dim">fréquentes</span></h2>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:'1px',background:'var(--border)',border:'1px solid var(--border)'}}>
+            {[
+              {q:"Comment fonctionne l'analyse IA ?",a:"Tu uploades ta replay en MP4. Notre IA extrait 8 captures d'écran réparties sur toute la partie et les envoie à Claude Vision. L'IA analyse chaque frame — minimap, positions, HUD — et génère un rapport de coaching personnalisé avec des corrections concrètes."},
+              {q:"Quels formats de replay sont acceptés ?",a:"MP4, WebM, MOV et MKV. Toute vidéo enregistrée avec OBS, Shadowplay, Xbox Game Bar ou directement depuis le client du jeu fonctionne. Taille maximale : 2 Go."},
+              {q:"Combien de temps dure une analyse ?",a:"Entre 2 et 4 minutes selon la taille de la vidéo. L'upload prend environ 30 secondes, l'extraction des frames 20 secondes, et Claude Vision analyse les images en 1-2 minutes."},
+              {q:"L'IA regarde vraiment ma vidéo ou c'est du générique ?",a:"Elle regarde vraiment ta vidéo. On extrait 8 captures d'écran de ta replay et on les envoie directement à Claude Vision. Le rapport mentionne ce qu'il observe réellement — ta minimap, tes positions, tes angles. Ce n'est pas du contenu générique."},
+              {q:"Sur quels jeux fonctionne MVP.coaching ?",a:"Actuellement Valorant, League of Legends, CS2 et Overwatch 2 sont en Live. Apex Legends et Fortnite sont en bêta. D'autres jeux seront ajoutés selon les retours de la communauté."},
+              {q:"Mes replays sont-elles stockées sur vos serveurs ?",a:"Non. Ta vidéo est automatiquement supprimée dès que l'analyse est terminée. On ne conserve aucun fichier vidéo — seulement le rapport généré."},
+              {q:"L'analyse fonctionne pour tous les niveaux ?",a:"Oui, du débutant au Diamond. L'IA adapte ses conseils selon ce qu'elle observe. Plus tu joues et plus tu uploades de replays, plus les conseils seront précis et ciblés sur tes vrais patterns d'erreurs."},
+              {q:"C'est vraiment gratuit pendant la bêta ?",a:"Oui, complètement gratuit pendant toute la durée de la bêta. Aucune carte bancaire requise. On te préviendra bien à l'avance avant de passer en mode payant."},
+              {q:"Combien d'analyses puis-je faire par mois ?",a:"Pendant la bêta : 3 analyses par mois sur le plan gratuit. C'est suffisant pour identifier tes principaux patterns d'erreurs et commencer à progresser sérieusement."},
+              {q:"En combien de temps vais-je progresser ?",a:"Ça dépend de toi. Les joueurs qui appliquent les conseils du plan d'entraînement voient généralement des résultats en 2 à 4 semaines. L'IA identifie tes erreurs — c'est à toi de les corriger en jeu."},
+              {q:"🤔 Est-ce que l'IA va me juger si je joue vraiment mal ?",a:"L'IA ne juge pas, elle coache. Elle a vu des joueurs faire des choses bien pires que toi — crois-nous. Son seul objectif c'est d'identifier tes erreurs et te donner les outils pour les corriger. Bonne nouvelle : plus tu joues mal, plus elle a de choses à dire. 😄"},
+            ].map((item, i) => (
+              <FaqItem key={i} q={item.q} a={item.a} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="cta-section" id="cta">
         <div className="cta-corner tl"></div>
@@ -313,5 +340,22 @@ export default function Home() {
         <div className="footer-copy">© 2025 MVP.COACHING — ALL SYSTEMS ONLINE</div>
       </footer>
     </>
+  )
+}
+
+function FaqItem({ q, a }) {
+  const [open, setOpen] = require('react').useState(false)
+  return (
+    <div style={{background: open ? 'var(--dark3)' : 'var(--dark2)', transition:'background 0.2s'}}>
+      <button onClick={() => setOpen(!open)} style={{width:'100%',display:'flex',justifyContent:'space-between',alignItems:'center',padding:'1.4rem 1.8rem',background:'transparent',border:'none',cursor:'pointer',textAlign:'left',gap:'1rem'}}>
+        <span style={{fontFamily:"'Orbitron',monospace",fontSize:'0.82rem',fontWeight:700,color:'#fff',letterSpacing:'0.03em'}}>{q}</span>
+        <span style={{color:'var(--cyan)',fontSize:'1.2rem',flexShrink:0,transform:open?'rotate(45deg)':'rotate(0)',transition:'transform 0.2s'}}>+</span>
+      </button>
+      {open && (
+        <div style={{padding:'0 1.8rem 1.4rem',fontSize:'0.9rem',color:'#5a8a9a',lineHeight:1.7,borderTop:'1px solid var(--border)'}}>
+          {a}
+        </div>
+      )}
+    </div>
   )
 }
