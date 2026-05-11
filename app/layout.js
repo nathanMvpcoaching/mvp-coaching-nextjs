@@ -1,5 +1,6 @@
 import './globals.css'
 import Particles from './components/Particles'
+import SuggestionModal from './components/SuggestionModal'
 
 export const metadata = {
   title: 'MVP.coaching — IA Coach Esport',
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
         <div className="scanlines" />
         <Particles />
         {children}
+        <SuggestionModal />
       </body>
     </html>
   )

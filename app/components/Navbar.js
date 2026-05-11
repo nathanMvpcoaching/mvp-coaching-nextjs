@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
+import { openSuggestionModal } from './SuggestionModal'
 
 export default function Navbar() {
   const [user, setUser] = useState(null)
@@ -53,6 +54,27 @@ export default function Navbar() {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <button
+          type="button"
+          onClick={openSuggestionModal}
+          aria-label="Soumettre une suggestion"
+          style={{
+            fontFamily: 'Share Tech Mono, monospace',
+            fontSize: '0.68rem',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            padding: '8px 14px',
+            background: 'transparent',
+            color: 'var(--cyan)',
+            border: '1px solid rgba(0,245,255,0.3)',
+            cursor: 'pointer',
+            transition: 'background 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease), transform 0.2s var(--ease)',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--cyan)'; e.currentTarget.style.background = 'rgba(0,245,255,0.08)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,245,255,0.3)'; e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'none' }}
+        >
+          💡 Suggérer
+        </button>
         {user ? (
           <>
             <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.65rem', color: 'var(--cyan)' }}>// {user.pseudo}</span>
