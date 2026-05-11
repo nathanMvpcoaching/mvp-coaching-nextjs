@@ -20,7 +20,6 @@ function scoreColor(score) {
 export default function Rapport() {
   const router = useRouter()
   const [report, setReport] = useState(null)
-  const [analyseId, setAnalyseId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [history, setHistory] = useState([])
 
@@ -29,8 +28,6 @@ export default function Rapport() {
     if (raw) {
       try { setReport(JSON.parse(raw)) } catch (e) { console.error('[rapport] JSON.parse a échoué:', e) }
     }
-    const aid = sessionStorage.getItem('mvp_analyse_id')
-    if (aid) setAnalyseId(aid)
     setLoading(false)
 
     ;(async () => {
@@ -50,7 +47,6 @@ export default function Rapport() {
 
   function openAnalysis(item) {
     if (item?.report) sessionStorage.setItem('mvp_rapport', JSON.stringify(item.report))
-    if (item?.id) sessionStorage.setItem('mvp_analyse_id', item.id)
     window.location.href = '/rapport'
   }
 
@@ -215,7 +211,7 @@ export default function Rapport() {
           )}
 
           {/* Feedback sur le rapport IA */}
-          <FeedbackForm analyseId={analyseId} />
+          <FeedbackForm />
 
           {/* Footer actions */}
           <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -230,17 +226,23 @@ export default function Rapport() {
 
 // ── FEEDBACK ──────────────────────────────────────────────────────────────
 const CRITERES = [
-  { key: 'note_pertinence', label: 'Pertinence' },
-  { key: 'note_clarte',     label: 'Clarté'     },
-  { key: 'note_precision',  label: 'Précision'  },
+  { key: 'note_utilite',   label: 'Utilité',             desc: "Est-ce que les conseils t'ont vraiment aidé ?" },
+  { key: 'note_precision', label: 'Précision',           desc: "L'IA a-t-elle bien analysé ta replay ?" },
+  { key: 'note_clarte',    label: 'Clarté',              desc: "Les explications sont-elles faciles à comprendre ?" },
+  { key: 'note_plan',      label: "Plan d'entraînement", desc: "Le plan hebdomadaire est-il applicable ?" },
 ]
 
-function StarRow({ label, value, onChange }) {
+const INITIAL_NOTES = Object.fromEntries(CRITERES.map(c => [c.key, 0]))
+
+function StarRow({ label, desc, value, onChange }) {
   const [hover, setHover] = useState(0)
   const active = hover || value
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '1rem', alignItems: 'center' }}>
-      <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.14em', color: '#8ab8cc', textTransform: 'uppercase' }}>{label}</span>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1.5rem', alignItems: 'center' }}>
+      <div>
+        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.14em', color: '#c8dde8', textTransform: 'uppercase' }}>{label}</div>
+        <div style={{ fontSize: '0.82rem', color: 'rgba(232,240,245,0.4)', marginTop: '3px' }}>{desc}</div>
+      </div>
       <div style={{ display: 'flex', gap: '4px' }} onMouseLeave={() => setHover(0)}>
         {[1, 2, 3, 4, 5].map(n => {
           const filled = n <= active
@@ -273,14 +275,15 @@ function StarRow({ label, value, onChange }) {
   )
 }
 
-function FeedbackForm({ analyseId }) {
-  const [notes, setNotes] = useState({ note_pertinence: 0, note_clarte: 0, note_precision: 0 })
+function FeedbackForm() {
+  const [notes, setNotes] = useState(INITIAL_NOTES)
   const [commentaire, setCommentaire] = useState('')
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
 
-  const canSubmit = CRITERES.every(c => notes[c.key] >= 1) && !sending
+  const allRated = CRITERES.every(c => notes[c.key] >= 1)
+  const canSubmit = allRated && !sending
 
   async function submit(e) {
     e.preventDefault()
@@ -292,12 +295,12 @@ function FeedbackForm({ analyseId }) {
       const uid = sessionData?.session?.user?.id
       if (!uid) throw new Error('Tu dois être connecté pour envoyer un retour.')
       const { error: insertErr } = await supabase.from('feedbacks').insert({
-        user_id: uid,
-        analyse_id: analyseId || null,
-        note_pertinence: notes.note_pertinence,
-        note_clarte:     notes.note_clarte,
-        note_precision:  notes.note_precision,
-        commentaire: commentaire.trim() || null,
+        user_id:        uid,
+        note_utilite:   notes.note_utilite,
+        note_precision: notes.note_precision,
+        note_clarte:    notes.note_clarte,
+        note_plan:      notes.note_plan,
+        commentaire:    commentaire.trim() || null,
       })
       if (insertErr) throw insertErr
       setSent(true)
@@ -312,9 +315,8 @@ function FeedbackForm({ analyseId }) {
     return (
       <div style={{ marginTop: '3rem', border: '1px solid rgba(0,255,136,0.35)', background: 'rgba(0,255,136,0.04)', padding: '2rem', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, #00ff88, transparent)' }} />
-        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.18em', color: '#00ff88', textTransform: 'uppercase', marginBottom: '0.6rem' }}>// RETOUR ENREGISTRÉ</div>
-        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '1rem', color: '#fff', marginBottom: '0.4rem' }}>Merci pour ton feedback ✓</div>
-        <div style={{ fontSize: '0.88rem', color: '#8ab8cc' }}>Chaque retour aide l'IA à devenir plus précise sur tes prochaines analyses.</div>
+        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.18em', color: '#00ff88', textTransform: 'uppercase', marginBottom: '0.8rem', textShadow: '0 0 12px rgba(0,255,136,0.4)' }}>// RETOUR REÇU — MERCI</div>
+        <div style={{ fontSize: '0.9rem', color: '#8ab8cc', lineHeight: 1.55 }}>Chaque note aide à entraîner une IA plus utile sur tes prochaines analyses.</div>
       </div>
     )
   }
@@ -323,13 +325,14 @@ function FeedbackForm({ analyseId }) {
     <form onSubmit={submit} style={{ marginTop: '3rem', border: '1px solid var(--border)', background: 'var(--dark2)', padding: '2rem', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, var(--cyan), transparent)' }} />
       <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.18em', color: 'var(--cyan)', textTransform: 'uppercase', marginBottom: '0.6rem' }}>// NOTER CETTE ANALYSE</div>
-      <p style={{ fontSize: '0.85rem', color: '#5a8a9a', marginBottom: '1.6rem' }}>Ton retour entraîne l'IA à mieux te coacher la prochaine fois.</p>
+      <p style={{ fontSize: '0.85rem', color: '#5a8a9a', marginBottom: '1.8rem' }}>Ton retour entraîne l'IA à mieux te coacher la prochaine fois.</p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', marginBottom: '1.6rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginBottom: '2rem' }}>
         {CRITERES.map(c => (
           <StarRow
             key={c.key}
             label={c.label}
+            desc={c.desc}
             value={notes[c.key]}
             onChange={n => setNotes(prev => ({ ...prev, [c.key]: n }))}
           />
@@ -342,7 +345,7 @@ function FeedbackForm({ analyseId }) {
         onChange={e => setCommentaire(e.target.value)}
         rows={4}
         maxLength={1000}
-        placeholder="Ce qui t'a marqué, ce qui manquait, ce qui ne colle pas..."
+        placeholder="Dis-nous ce qu'on peut améliorer..."
         style={{
           width: '100%',
           background: 'rgba(0,245,255,0.03)',
@@ -374,9 +377,9 @@ function FeedbackForm({ analyseId }) {
         >
           {sending ? 'Envoi...' : 'Envoyer mon retour'}
         </button>
-        {!CRITERES.every(c => notes[c.key] >= 1) && (
+        {!allRated && (
           <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.12em', color: 'rgba(232,240,245,0.35)' }}>
-            // Note les 3 critères pour envoyer
+            // Note les 4 critères pour envoyer
           </span>
         )}
       </div>
