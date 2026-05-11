@@ -73,7 +73,7 @@ export default function Navbar() {
           onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--cyan)'; e.currentTarget.style.background = 'rgba(0,245,255,0.08)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,245,255,0.3)'; e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'none' }}
         >
-          💡 Suggérer
+          Feedback 💡
         </button>
         {user ? (
           <>
