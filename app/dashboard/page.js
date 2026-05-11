@@ -141,16 +141,18 @@ export default function Dashboard() {
           setProgress(100)
           setProgressMsg('Analyse terminée !')
           sessionStorage.setItem('mvp_rapport', JSON.stringify(job.report))
+          sessionStorage.removeItem('mvp_analyse_id')
           if (user?.id) {
-            const { error: dbError } = await supabase.from('analyses').insert({
+            const { data: inserted, error: dbError } = await supabase.from('analyses').insert({
               user_id: user.id,
               jeu: game,
               score_global: job.report.score_global ?? null,
               report: job.report,
               riot_id: riotId || null,
               region: region || null,
-            })
+            }).select('id').single()
             if (dbError) console.warn('[dashboard] save analysis failed:', dbError.message)
+            else if (inserted?.id) sessionStorage.setItem('mvp_analyse_id', inserted.id)
           }
           await new Promise(r => setTimeout(r, 500))
           window.location.href = '/rapport'

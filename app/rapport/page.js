@@ -20,6 +20,7 @@ function scoreColor(score) {
 export default function Rapport() {
   const router = useRouter()
   const [report, setReport] = useState(null)
+  const [analyseId, setAnalyseId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [history, setHistory] = useState([])
 
@@ -28,6 +29,8 @@ export default function Rapport() {
     if (raw) {
       try { setReport(JSON.parse(raw)) } catch (e) { console.error('[rapport] JSON.parse a échoué:', e) }
     }
+    const aid = sessionStorage.getItem('mvp_analyse_id')
+    if (aid) setAnalyseId(aid)
     setLoading(false)
 
     ;(async () => {
@@ -47,6 +50,7 @@ export default function Rapport() {
 
   function openAnalysis(item) {
     if (item?.report) sessionStorage.setItem('mvp_rapport', JSON.stringify(item.report))
+    if (item?.id) sessionStorage.setItem('mvp_analyse_id', item.id)
     window.location.href = '/rapport'
   }
 
@@ -210,6 +214,9 @@ export default function Rapport() {
             </div>
           )}
 
+          {/* Feedback sur le rapport IA */}
+          <FeedbackForm analyseId={analyseId} />
+
           {/* Footer actions */}
           <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             <Link href="/dashboard" className="btn-primary" style={{ fontSize: '0.78rem', padding: '13px 28px' }}>⚡ Analyser une autre replay</Link>
@@ -218,5 +225,161 @@ export default function Rapport() {
         </div>
       </main>
     </>
+  )
+}
+
+// ── FEEDBACK ──────────────────────────────────────────────────────────────
+const CRITERES = [
+  { key: 'note_pertinence', label: 'Pertinence' },
+  { key: 'note_clarte',     label: 'Clarté'     },
+  { key: 'note_precision',  label: 'Précision'  },
+]
+
+function StarRow({ label, value, onChange }) {
+  const [hover, setHover] = useState(0)
+  const active = hover || value
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '1rem', alignItems: 'center' }}>
+      <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.14em', color: '#8ab8cc', textTransform: 'uppercase' }}>{label}</span>
+      <div style={{ display: 'flex', gap: '4px' }} onMouseLeave={() => setHover(0)}>
+        {[1, 2, 3, 4, 5].map(n => {
+          const filled = n <= active
+          return (
+            <button
+              key={n}
+              type="button"
+              aria-label={`${label} : ${n} sur 5`}
+              onMouseEnter={() => setHover(n)}
+              onClick={() => onChange(n)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px 2px',
+                fontSize: '1.5rem',
+                lineHeight: 1,
+                color: filled ? 'var(--cyan)' : 'rgba(0,245,255,0.18)',
+                textShadow: filled ? '0 0 10px rgba(0,245,255,0.5)' : 'none',
+                transition: 'color 0.15s var(--ease), transform 0.15s var(--ease), text-shadow 0.15s var(--ease)',
+                transform: hover === n ? 'translateY(-2px)' : 'none',
+              }}
+            >
+              {filled ? '★' : '☆'}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function FeedbackForm({ analyseId }) {
+  const [notes, setNotes] = useState({ note_pertinence: 0, note_clarte: 0, note_precision: 0 })
+  const [commentaire, setCommentaire] = useState('')
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
+
+  const canSubmit = CRITERES.every(c => notes[c.key] >= 1) && !sending
+
+  async function submit(e) {
+    e.preventDefault()
+    if (!canSubmit) return
+    setError('')
+    setSending(true)
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const uid = sessionData?.session?.user?.id
+      if (!uid) throw new Error('Tu dois être connecté pour envoyer un retour.')
+      const { error: insertErr } = await supabase.from('feedbacks').insert({
+        user_id: uid,
+        analyse_id: analyseId || null,
+        note_pertinence: notes.note_pertinence,
+        note_clarte:     notes.note_clarte,
+        note_precision:  notes.note_precision,
+        commentaire: commentaire.trim() || null,
+      })
+      if (insertErr) throw insertErr
+      setSent(true)
+    } catch (err) {
+      setError(err.message || 'Envoi impossible. Réessaie dans un instant.')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  if (sent) {
+    return (
+      <div style={{ marginTop: '3rem', border: '1px solid rgba(0,255,136,0.35)', background: 'rgba(0,255,136,0.04)', padding: '2rem', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, #00ff88, transparent)' }} />
+        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.18em', color: '#00ff88', textTransform: 'uppercase', marginBottom: '0.6rem' }}>// RETOUR ENREGISTRÉ</div>
+        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '1rem', color: '#fff', marginBottom: '0.4rem' }}>Merci pour ton feedback ✓</div>
+        <div style={{ fontSize: '0.88rem', color: '#8ab8cc' }}>Chaque retour aide l'IA à devenir plus précise sur tes prochaines analyses.</div>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={submit} style={{ marginTop: '3rem', border: '1px solid var(--border)', background: 'var(--dark2)', padding: '2rem', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, var(--cyan), transparent)' }} />
+      <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.18em', color: 'var(--cyan)', textTransform: 'uppercase', marginBottom: '0.6rem' }}>// NOTER CETTE ANALYSE</div>
+      <p style={{ fontSize: '0.85rem', color: '#5a8a9a', marginBottom: '1.6rem' }}>Ton retour entraîne l'IA à mieux te coacher la prochaine fois.</p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', marginBottom: '1.6rem' }}>
+        {CRITERES.map(c => (
+          <StarRow
+            key={c.key}
+            label={c.label}
+            value={notes[c.key]}
+            onChange={n => setNotes(prev => ({ ...prev, [c.key]: n }))}
+          />
+        ))}
+      </div>
+
+      <label style={{ display: 'block', fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.14em', color: '#8ab8cc', textTransform: 'uppercase', marginBottom: '0.6rem' }}>Commentaire (optionnel)</label>
+      <textarea
+        value={commentaire}
+        onChange={e => setCommentaire(e.target.value)}
+        rows={4}
+        maxLength={1000}
+        placeholder="Ce qui t'a marqué, ce qui manquait, ce qui ne colle pas..."
+        style={{
+          width: '100%',
+          background: 'rgba(0,245,255,0.03)',
+          border: '1px solid var(--border)',
+          outline: 'none',
+          padding: '12px 14px',
+          fontFamily: 'Rajdhani, sans-serif',
+          fontSize: '0.95rem',
+          color: '#c8dde8',
+          resize: 'vertical',
+          transition: 'border-color 0.2s var(--ease), background 0.2s var(--ease)',
+        }}
+        onFocus={e => { e.currentTarget.style.borderColor = 'var(--border-hot)'; e.currentTarget.style.background = 'rgba(0,245,255,0.06)' }}
+        onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'rgba(0,245,255,0.03)' }}
+      />
+
+      {error && (
+        <div style={{ marginTop: '1rem', fontFamily: 'Share Tech Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.1em', color: '#ff4060', border: '1px solid rgba(255,64,96,0.3)', background: 'rgba(255,64,96,0.06)', padding: '10px 14px' }}>
+          // {error}
+        </div>
+      )}
+
+      <div style={{ marginTop: '1.6rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+        <button
+          type="submit"
+          className="btn-primary"
+          disabled={!canSubmit}
+          style={{ fontSize: '0.78rem', padding: '13px 28px', opacity: canSubmit ? 1 : 0.45, cursor: canSubmit ? 'pointer' : 'not-allowed' }}
+        >
+          {sending ? 'Envoi...' : 'Envoyer mon retour'}
+        </button>
+        {!CRITERES.every(c => notes[c.key] >= 1) && (
+          <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.12em', color: 'rgba(232,240,245,0.35)' }}>
+            // Note les 3 critères pour envoyer
+          </span>
+        )}
+      </div>
+    </form>
   )
 }
