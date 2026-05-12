@@ -17,6 +17,15 @@ export function openSuggestionModal() {
 
 const INITIAL_FORM = { titre: '', description: '', categorie: 'fonctionnalite' }
 
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'textarea:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',')
+
 export default function SuggestionModal() {
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState(INITIAL_FORM)
@@ -24,6 +33,8 @@ export default function SuggestionModal() {
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
   const firstFieldRef = useRef(null)
+  const dialogRef = useRef(null)
+  const previouslyFocusedRef = useRef(null)
 
   useEffect(() => {
     function onOpen() {
@@ -38,14 +49,50 @@ export default function SuggestionModal() {
 
   useEffect(() => {
     if (!open) return
-    function onKey(e) { if (e.key === 'Escape') close() }
+
+    previouslyFocusedRef.current = document.activeElement
+
+    function onKey(e) {
+      if (e.key === 'Escape') { close(); return }
+      if (e.key !== 'Tab') return
+      const root = dialogRef.current
+      if (!root) return
+      const focusables = Array.from(root.querySelectorAll(FOCUSABLE_SELECTOR))
+        .filter(el => !el.hasAttribute('aria-hidden') && el.offsetParent !== null)
+      if (focusables.length === 0) {
+        e.preventDefault()
+        root.focus()
+        return
+      }
+      const first = focusables[0]
+      const last  = focusables[focusables.length - 1]
+      const active = document.activeElement
+      const inside = root.contains(active)
+      if (e.shiftKey) {
+        if (!inside || active === first) {
+          e.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (!inside || active === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
+    }
     window.addEventListener('keydown', onKey)
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    setTimeout(() => firstFieldRef.current?.focus(), 30)
+    const focusTimer = setTimeout(() => firstFieldRef.current?.focus(), 30)
     return () => {
       window.removeEventListener('keydown', onKey)
+      clearTimeout(focusTimer)
       document.body.style.overflow = prev
+      const toRestore = previouslyFocusedRef.current
+      previouslyFocusedRef.current = null
+      if (toRestore && typeof toRestore.focus === 'function') {
+        toRestore.focus()
+      }
     }
   }, [open])
 
@@ -99,9 +146,12 @@ export default function SuggestionModal() {
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="suggestion-modal-title"
+        aria-describedby="suggestion-modal-desc"
+        tabIndex={-1}
         onClick={e => e.stopPropagation()}
         style={{
           position: 'relative',
@@ -110,6 +160,7 @@ export default function SuggestionModal() {
           border: '1px solid var(--border-hot)',
           boxShadow: '0 0 60px rgba(0,245,255,0.15), 0 30px 80px rgba(0,0,0,0.6)',
           maxHeight: 'calc(100vh - 4rem)', overflowY: 'auto',
+          outline: 'none',
         }}
       >
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, var(--cyan), transparent)' }} />
@@ -142,7 +193,7 @@ export default function SuggestionModal() {
             <div id="suggestion-modal-title" style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.74rem', letterSpacing: '0.18em', color: '#00ff88', textTransform: 'uppercase', marginBottom: '1rem', textShadow: '0 0 12px rgba(0,255,136,0.4)' }}>
               // SUGGESTION REÇUE — MERCI !
             </div>
-            <p style={{ fontSize: '0.92rem', color: '#8ab8cc', lineHeight: 1.6, marginBottom: '1.6rem' }}>
+            <p id="suggestion-modal-desc" style={{ fontSize: '0.92rem', color: '#8ab8cc', lineHeight: 1.6, marginBottom: '1.6rem' }}>
               On lit toutes les idées. Les plus utiles sont intégrées à la roadmap.
             </p>
             <button type="button" onClick={close} className="btn-primary" style={{ fontSize: '0.78rem', padding: '13px 28px' }}>
@@ -154,7 +205,7 @@ export default function SuggestionModal() {
             <div id="suggestion-modal-title" style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.2em', color: 'var(--cyan)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
               // SOUMETTRE UNE IDÉE
             </div>
-            <p style={{ fontSize: '0.85rem', color: '#5a8a9a', marginBottom: '1.6rem' }}>
+            <p id="suggestion-modal-desc" style={{ fontSize: '0.85rem', color: '#5a8a9a', marginBottom: '1.6rem' }}>
               Une feature manquante, un bug, une amélioration ? Balance.
             </p>
 
