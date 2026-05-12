@@ -5,7 +5,7 @@ import SuggestionModal from './components/SuggestionModal'
 export const metadata = {
   title: 'MVP.coaching — IA Coach Esport',
   description: "Analyse tes replays avec l'IA.",
-  icons: { icon: '/android-chrome-192x192.png' },
+  icons: { icon: '/favicon.png' },
 }
 
 export default function RootLayout({ children }) {
